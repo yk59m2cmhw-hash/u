@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Мандала AI-стартапа</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700&display=swap&text=%E7%9B%AE%E6%A8%99%E9%81%94%E6%88%90%E3%82%B7%E3%83%BC%E3%83%88">
+<style>
+/* Layout: a 9x9 planning sheet (目標達成シート). Heavy ink rules split nine 3x3 blocks;
+   the hub block holds the goal, with the 8 pillars in the same positions as their outer
+   blocks. Below 1024px the blocks stack, hub first. */
+:root{
+  --paper:#f4f5fa;
+  --sheet:#ffffff;
+  --ink:#151b47;
+  --ink-soft:#565f8f;
+  --rule:#d5daee;
+  --frame:#151b47;
+  --goal:#1f2c88;
+  --goal-ink:#f4f6ff;
+  --pillar:#e5e8f7;
+  --lit:#fff7d1;
+  --marker:#ffe27a;
+  --marker-ink:#151b47;
+  --ok:#1d7a4f;
+  --font-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --font-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --font-jp:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0a0d20;--sheet:#10142c;--ink:#e8ebff;--ink-soft:#a3aad6;--rule:#252b55;--frame:#9aa4ea;
+    --goal:#3445c9;--goal-ink:#ffffff;--pillar:#1a2050;--lit:#231f0b;--marker:#6e5c10;--marker-ink:#fff7d6;
+    --ok:#5fd39a;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0a0d20;--sheet:#10142c;--ink:#e8ebff;--ink-soft:#a3aad6;--rule:#252b55;--frame:#9aa4ea;
+  --goal:#3445c9;--goal-ink:#ffffff;--pillar:#1a2050;--lit:#231f0b;--marker:#6e5c10;--marker-ink:#fff7d6;
+  --ok:#5fd39a;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;display:grid;gap:28px;
+  padding-block:clamp(20px,4vw,48px) 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px))}
+.head{display:grid;gap:14px}
+.eyebrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.eyebrow .jp{font-family:var(--font-jp);font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:none;color:var(--ink)}
+h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:clamp(28px,4.4vw,52px);line-height:1.05;letter-spacing:-.01em;text-wrap:balance}
+.lede{margin:0;max-width:68ch;color:var(--ink-soft)}
+.lede strong{color:var(--ink);font-weight:600}
+.fields{margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:2px solid var(--frame);background:var(--sheet)}
+.fields div{min-width:0;padding:10px 14px;border-right:1px solid var(--rule)}
+.fields div:last-child{border-right:0}
+.fields dt{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.fields dd{margin:2px 0 0;font-weight:600;font-variant-numeric:tabular-nums}
+.principle{margin:0;max-width:68ch;font-weight:500}
+.principle span{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-right:8px}
+
+.sheet{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;padding:2px;background:var(--frame)}
+.block{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--rule);transition:opacity .2s ease}
+.block>ol{display:contents;list-style:none;margin:0;padding:0}
+.hub{grid-area:2/2}
+.goal,.core{grid-area:2/2}
+.cell{min-width:0;aspect-ratio:1/1;padding:9px 10px;display:flex;flex-direction:column;gap:6px;background:var(--sheet);
+  font-size:clamp(11.5px,1.05vw,12.5px);line-height:1.32;overflow-wrap:break-word;hyphens:manual;
+  transition:background-color .2s ease,color .2s ease}
+.cell .no{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.04em;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.act .txt{flex:1}
+.act.ready .no::after{content:" ◐ заготовка";color:var(--ink-soft)}
+.act.done .no::after{content:" ✓ сделано";color:var(--ok)}
+.act.done .txt{text-decoration:line-through;text-decoration-thickness:1px;color:var(--ink-soft)}
+.core,.pil{margin:0;font:inherit;justify-content:center;align-items:center;text-align:center;background:var(--pillar);color:var(--ink)}
+.core .no,.pil .no{font-family:var(--font-display);font-size:13px;font-weight:500;letter-spacing:.04em;color:var(--ink-soft)}
+.core .nm,.pil .nm{font-weight:600;font-size:clamp(12px,1.12vw,13.5px);line-height:1.22;text-wrap:balance}
+.core .sb,.pil .sb{font-size:11px;line-height:1.25;color:var(--ink-soft)}
+.pil{text-decoration:none;cursor:pointer}
+.pil:focus-visible{outline:3px solid var(--goal);outline-offset:-3px}
+.goal{justify-content:center;align-items:center;text-align:center;gap:3px;background:var(--goal);color:var(--goal-ink)}
+.goal .lbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.goal .big{font-family:var(--font-display);font-weight:700;font-size:clamp(14px,1.45vw,19px);line-height:1.05;white-space:nowrap}
+.goal .dl{font-family:var(--font-mono);font-size:11px}
+.goal .sb{font-size:11px;line-height:1.25;opacity:.9}
+
+.sheet.has-lit .block:not(.hub):not(.is-lit){opacity:.42}
+.block.is-lit .cell{background:var(--lit)}
+.block.is-lit .core,.pil.is-lit{background:var(--marker);color:var(--marker-ink)}
+.block.is-lit .core .no,.block.is-lit .core .sb,.pil.is-lit .no,.pil.is-lit .sb{color:var(--marker-ink)}
+
+.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 28px}
+.notes section{min-width:0;display:grid;gap:6px;align-content:start}
+.notes h2{margin:0;font-family:var(--font-display);font-weight:500;font-size:15px;letter-spacing:.01em}
+.notes p{margin:0;color:var(--ink-soft);max-width:60ch}
+.notes code{font-family:var(--font-mono);font-size:12.5px;color:var(--ink)}
+.foot{margin:0;padding-top:14px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-soft)}
+.foot a{color:var(--ink);text-underline-offset:3px}
+.foot a:focus-visible{outline:2px solid var(--goal);outline-offset:2px}
+
+@media (max-width:1023px){
+  .sheet{grid-template-columns:minmax(0,1fr);gap:16px;padding:0;background:transparent}
+  .hub{grid-area:auto}
+  .block{width:100%;max-width:560px;justify-self:center;border:2px solid var(--frame);scroll-margin-top:16px}
+  .cell{aspect-ratio:auto;min-height:116px;font-size:13.5px;padding:10px 11px}
+  .core .nm,.pil .nm{font-size:14px}
+  .goal .big{font-size:clamp(14px,4vw,20px)}
+  .sheet.has-lit .block:not(.hub):not(.is-lit){opacity:1}
+}
+@media (max-width:800px){.notes{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fields div:nth-child(2){border-right:0}
+  .fields div:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+}
+@media (max-width:480px){.cell{font-size:12.5px;padding:9px 8px}.core .nm,.pil .nm{font-size:13px}.core .sb,.pil .sb,.goal .sb{font-size:10.5px}}
+@media (max-width:380px){.cell{min-height:104px;font-size:12px}}
+@media (prefers-reduced-motion:reduce){.block,.cell{transition:none}}
+</style>
+</head>
+<body>
+<main class="page" lang="ru">
+<header class="head">
+<p class="eyebrow"><span class="jp" lang="ja">目標達成シート</span><span>Метод Харады · Open Window 64</span><span>9 × 9 = 81 клетка</span></p>
+<h1>Мандала AI-стартапа</h1>
+<p class="lede">Так школьником расписал свою цель <strong>Сёхэй Отани</strong>: в центре — цель, вокруг — восемь опор, у каждой опоры — восемь конкретных действий. Здесь та же сетка для вашего стартапа. Наведите на опору в центре или нажмите на неё, чтобы подсветить её блок.</p>
+<dl class="fields">
+<div><dt>Цель</dt><dd>$50K MRR</dd></div>
+<div><dt>Срок</dt><dd>ноябрь 2027</dd></div>
+<div><dt>Начато</dt><dd>11.11.2026</dd></div>
+<div><dt>Сделано</dt><dd>0 из 64</dd></div>
+</dl>
+<p class="principle"><span>Принцип</span>Кредиты оплачивают инфраструктуру, деньги приносят агенты, которые делают работу для бизнеса.</p>
+</header>
+<div class="sheet">
+<section class="block hub" aria-label="Цель и восемь опор"><div class="cell goal"><span class="lbl">Цель</span><span class="big">$50K MRR</span><span class="dl">к 11.2027</span><span class="sb">100 бизнесов на наших агентах</span></div><a class="cell pil" href="#p1" data-p="1"><span class="no">1</span><span class="nm">Компания и доверие</span><span class="sb">без этого не дают кредиты</span></a><a class="cell pil" href="#p2" data-p="2"><span class="no">2</span><span class="nm">Облачные кредиты</span><span class="sb">$1M к ноябрю 2027</span></a><a class="cell pil" href="#p3" data-p="3"><span class="no">3</span><span class="nm">Аксе­лера­торы и инвесторы</span><span class="sb">открывают тиры $100K+</span></a><a class="cell pil" href="#p4" data-p="4"><span class="no">4</span><span class="nm">Команда и характер</span><span class="sb">привычки решают, как у Отани</span></a><a class="cell pil" href="#p5" data-p="5"><span class="no">5</span><span class="nm">Инф­рас­трук­тура и модели</span><span class="sb">дёшево, надёжно, пере­носимо</span></a><a class="cell pil" href="#p6" data-p="6"><span class="no">6</span><span class="nm">Ниша и продажи</span><span class="sb">одна ниша, реальные деньги</span></a><a class="cell pil" href="#p7" data-p="7"><span class="no">7</span><span class="nm">Продукт: AI-агенты</span><span class="sb">агент делает работу</span></a><a class="cell pil" href="#p8" data-p="8"><span class="no">8</span><span class="nm">Экономика и деньги</span><span class="sb">прибыль без учёта кредитов</span></a></section>
+<section class="block" id="p1" data-p="1" aria-labelledby="p1-h"><h2 class="cell core" id="p1-h"><span class="no">1</span><span class="nm">Компания и доверие</span><span class="sb">без этого не дают кредиты</span></h2><ol><li class="cell act"><span class="no">1.1</span><span class="txt">Юрлицо в стране, где доступны Google, AWS, Oracle</span></li><li class="cell act"><span class="no">1.2</span><span class="txt">Домен и сайт за один день</span></li><li class="cell act"><span class="no">1.3</span><span class="txt">Почта на своём домене у обоих</span></li><li class="cell act"><span class="no">1.4</span><span class="txt">LinkedIn компании и профили фаундеров</span></li><li class="cell act"><span class="no">1.5</span><span class="txt">Сог­лаше­ние фаундеров: доли и вестинг на 4 года</span></li><li class="cell act"><span class="no">1.6</span><span class="txt">Счёт в банке и учёт расходов с первого дня</span></li><li class="cell act"><span class="no">1.7</span><span class="txt">Privacy Policy, Terms и DPA на сайте</span></li><li class="cell act"><span class="no">1.8</span><span class="txt">Публичный след: GitHub, блог, демо-видео</span></li></ol></section><section class="block" id="p2" data-p="2" aria-labelledby="p2-h"><h2 class="cell core" id="p2-h"><span class="no">2</span><span class="nm">Облачные кредиты</span><span class="sb">$1M к ноябрю 2027</span></h2><ol><li class="cell act"><span class="no">2.1</span><span class="txt">Реестр из 100+ программ с прио­рите­тами</span></li><li class="cell act"><span class="no">2.2</span><span class="txt">Три заявки каждую неделю</span></li><li class="cell act"><span class="no">2.3</span><span class="txt">Банк готовых ответов на типовые вопросы</span></li><li class="cell act"><span class="no">2.4</span><span class="txt">Use of credits: архи­тек­тура и расчёт GPU-часов</span></li><li class="cell act"><span class="no">2.5</span><span class="txt">Квоты на GPU зап­раши­вать заранее</span></li><li class="cell act"><span class="no">2.6</span><span class="txt">Бюджет-алерты и авто-вык­люче­ние GPU</span></li><li class="cell act"><span class="no">2.7</span><span class="txt">Календарь сгорания кредитов</span></li><li class="cell act"><span class="no">2.8</span><span class="txt">Одна компания — одна заявка. Без фейков</span></li></ol></section><section class="block" id="p3" data-p="3" aria-labelledby="p3-h"><h2 class="cell core" id="p3-h"><span class="no">3</span><span class="nm">Аксе­лера­торы и инвесторы</span><span class="sb">открывают тиры $100K+</span></h2><ol><li class="cell act"><span class="no">3.1</span><span class="txt">NVIDIA Inception сразу после юрлица</span></li><li class="cell act"><span class="no">3.2</span><span class="txt">Google for Startups Acce­lera­tor: AI</span></li><li class="cell act"><span class="no">3.3</span><span class="txt">AWS Gene­rative AI Acce­lera­tor</span></li><li class="cell act"><span class="no">3.4</span><span class="txt">YC, Antler, Techstars: подавать в каждый набор</span></li><li class="cell act"><span class="no">3.5</span><span class="txt">Питч-дек на 10 слайдов и демо на 2 минуты</span></li><li class="cell act"><span class="no">3.6</span><span class="txt">20 тёплых знакомств с ангелами</span></li><li class="cell act"><span class="no">3.7</span><span class="txt">Еже­месяч­ное письмо инвес­торам с метриками</span></li><li class="cell act"><span class="no">3.8</span><span class="txt">Pre-seed $100–250K открывает тиры $100K+</span></li></ol></section><section class="block" id="p4" data-p="4" aria-labelledby="p4-h"><h2 class="cell core" id="p4-h"><span class="no">4</span><span class="nm">Команда и характер</span><span class="sb">привычки решают, как у Отани</span></h2><ol><li class="cell act"><span class="no">4.1</span><span class="txt">Роли: один строит продукт, второй продаёт</span></li><li class="cell act"><span class="no">4.2</span><span class="txt">Пн — план, пт — демо, вс — ретро</span></li><li class="cell act"><span class="no">4.3</span><span class="txt">Один фокус на 90 дней</span></li><li class="cell act"><span class="no">4.4</span><span class="txt">Отвечать клиенту в течение часа</span></li><li class="cell act"><span class="no">4.5</span><span class="txt">Строить публично: два поста в неделю</span></li><li class="cell act"><span class="no">4.6</span><span class="txt">Помогать сооб­щес­тву: open-source и форумы</span></li><li class="cell act"><span class="no">4.7</span><span class="txt">Сон 7 часов и спорт: это марафон</span></li><li class="cell act"><span class="no">4.8</span><span class="txt">Держать слово: сроки, обещания, правила</span></li></ol></section><section class="block" id="p5" data-p="5" aria-labelledby="p5-h"><h2 class="cell core" id="p5-h"><span class="no">5</span><span class="nm">Инф­рас­трук­тура и модели</span><span class="sb">дёшево, надёжно, пере­носимо</span></h2><ol><li class="cell act"><span class="no">5.1</span><span class="txt">vLLM или SGLang с OpenAI-сов­мес­тимым API</span></li><li class="cell act"><span class="no">5.2</span><span class="txt">Шлюз LiteLLM: свои модели и API-модели</span></li><li class="cell act"><span class="no">5.3</span><span class="txt">Terraform: поднять и снести за 10 минут</span></li><li class="cell act"><span class="no">5.4</span><span class="txt">Несколько облаков: GCP, AWS, Azure, OCI</span></li><li class="cell act"><span class="no">5.5</span><span class="txt">Сначала малые GPU (L4) и модели 7–32B</span></li><li class="cell act"><span class="no">5.6</span><span class="txt">Учёт токенов и затрат по каждому клиенту</span></li><li class="cell act"><span class="no">5.7</span><span class="txt">LoRA-доо­буче­ние под нишу и язык</span></li><li class="cell act"><span class="no">5.8</span><span class="txt">Тесты качества до и после каждого изменения</span></li></ol></section><section class="block" id="p6" data-p="6" aria-labelledby="p6-h"><h2 class="cell core" id="p6-h"><span class="no">6</span><span class="nm">Ниша и продажи</span><span class="sb">одна ниша, реальные деньги</span></h2><ol><li class="cell act"><span class="no">6.1</span><span class="txt">Выбрать одну нишу по скорингу из 10–15</span></li><li class="cell act"><span class="no">6.2</span><span class="txt">30 интервью с вла­дельцами бизнеса</span></li><li class="cell act"><span class="no">6.3</span><span class="txt">3 пилота за 30 дней</span></li><li class="cell act"><span class="no">6.4</span><span class="txt">Цена за результат, а не за токены</span></li><li class="cell act"><span class="no">6.5</span><span class="txt">10 касаний потен­циальных клиентов в день</span></li><li class="cell act"><span class="no">6.6</span><span class="txt">Кейс с цифрами после каждого пилота</span></li><li class="cell act"><span class="no">6.7</span><span class="txt">Партнёры: агентства и интег­раторы</span></li><li class="cell act"><span class="no">6.8</span><span class="txt">Клиент приводит клиента: рефералы</span></li></ol></section><section class="block" id="p7" data-p="7" aria-labelledby="p7-h"><h2 class="cell core" id="p7-h"><span class="no">7</span><span class="nm">Продукт: AI-агенты</span><span class="sb">агент делает работу</span></h2><ol><li class="cell act"><span class="no">7.1</span><span class="txt">Один агент — один процесс с измеримым результа­том</span></li><li class="cell act"><span class="no">7.2</span><span class="txt">Каналы: WhatsApp, Telegram, почта, сайт</span></li><li class="cell act"><span class="no">7.3</span><span class="txt">Интег­рации: CRM, календарь, таблицы</span></li><li class="cell act"><span class="no">7.4</span><span class="txt">Передача человеку, когда агент не уверен</span></li><li class="cell act"><span class="no">7.5</span><span class="txt">Готовые шаблоны агентов для ниши</span></li><li class="cell act"><span class="no">7.6</span><span class="txt">Кабинет клиента: что сделано и сколько сэко­ном­лено</span></li><li class="cell act"><span class="no">7.7</span><span class="txt">Под­клю­чение клиента меньше чем за день</span></li><li class="cell act"><span class="no">7.8</span><span class="txt">Логи, огра­ниче­ния и изоляция данных</span></li></ol></section><section class="block" id="p8" data-p="8" aria-labelledby="p8-h"><h2 class="cell core" id="p8-h"><span class="no">8</span><span class="nm">Экономика и деньги</span><span class="sb">прибыль без учёта кредитов</span></h2><ol><li class="cell act"><span class="no">8.1</span><span class="txt">Юнит-экономика в таблице до первой продажи</span></li><li class="cell act"><span class="no">8.2</span><span class="txt">Маржа от 70 % без учёта кредитов</span></li><li class="cell act"><span class="no">8.3</span><span class="txt">План на день, когда кончатся кредиты</span></li><li class="cell act"><span class="no">8.4</span><span class="txt">Запас денег в месяцах: пересчёт еже­месячно</span></li><li class="cell act"><span class="no">8.5</span><span class="txt">Дешевле: spot, кван­тиза­ция, кэш</span></li><li class="cell act"><span class="no">8.6</span><span class="txt">Никогда не продавать ниже себес­тои­мости</span></li><li class="cell act"><span class="no">8.7</span><span class="txt">Еже­месяч­ный отчёт о прибылях и убытках</span></li><li class="cell act"><span class="no">8.8</span><span class="txt">Гранты без доли: госу­дар­ствен­ные и фондов</span></li></ol></section>
+</div>
+<div class="notes">
+<section><h2>Как пользоваться</h2><p>Раз в неделю берите в работу 3–5 действий. Цель в центре не меняется, а действие можно заменить, если оно перестало двигать к цели.</p></section>
+<section><h2>Номера</h2><p>У каждого действия есть номер, например 2.3. Пишите его в задачах, коммитах и еженедельных отчётах, чтобы видеть, какая опора отстаёт.</p></section>
+<section><h2>Прогресс</h2><p>Отметки ставятся в <code>mandala/mandala.json</code>: «ready», когда в репозитории есть заготовка, и «done», когда действие сделано. Затем <code>python3 mandala/build.py</code>.</p></section>
+</div>
+<p class="foot">Разбор идеи, большие шаги и результаты облачных этапов: <a href="https://github.com/yk59m2cmhw-hash/u">github.com/yk59m2cmhw-hash/u</a></p>
+</main>
+<script>
+(function () {
+  var sheet = document.querySelector('.sheet');
+  if (!sheet) return;
+  var blocks = Array.prototype.slice.call(sheet.querySelectorAll('.block[data-p]'));
+  var pils = Array.prototype.slice.call(sheet.querySelectorAll('.pil[data-p]'));
+  var stacked = window.matchMedia('(max-width: 1023px)');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var pinned = null;
+  function light(p) {
+    blocks.forEach(function (b) { b.classList.toggle('is-lit', b.dataset.p === p); });
+    pils.forEach(function (c) { c.classList.toggle('is-lit', c.dataset.p === p); });
+    sheet.classList.toggle('has-lit', !!p);
+  }
+  function rest() { light(pinned); }
+  pils.forEach(function (c) {
+    var p = c.dataset.p;
+    c.addEventListener('mouseenter', function () { light(p); });
+    c.addEventListener('mouseleave', rest);
+    c.addEventListener('focus', function () { light(p); });
+    c.addEventListener('blur', rest);
+    c.addEventListener('click', function (e) {
+      e.preventDefault();
+      pinned = pinned === p ? null : p;
+      light(pinned || p);
+      if (stacked.matches) {
+        var t = document.getElementById('p' + p);
+        if (t) t.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
+      }
+    });
+  });
+  blocks.forEach(function (b) {
+    var p = b.dataset.p;
+    b.addEventListener('mouseenter', function () { light(p); });
+    b.addEventListener('mouseleave', rest);
+  });
+})();
+</script>
+</body>
+</html>
