@@ -1,0 +1,2 @@
+code,date,interviewer_role,clinic_type,chairs,role_interviewed,channels,inquiries_per_day,response_time,no_show_rate,current_tools,tried_before,monthly_tool_spend,decision_maker,privacy_concern,pain_1_5,commitment,next_step,notes
+C00-example,2026-11-20,product,dental,4,owner,"WhatsApp 60%, calls 40%",25,"2-3 hours in the evening",12%,"calendar + spreadsheet","chat widget, dropped after a month",$150,owner,medium,4,free pilot with WhatsApp access,"install pilot on 2026-11-25","EXAMPLE ROW - replace; keep real logs outside this public repo"
