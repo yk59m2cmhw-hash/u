@@ -123,3 +123,17 @@ def is_complaint(text):
 
 def is_sales_question(text):
     return bool(OFF_SALES.search(text or ""))
+
+
+OTHER_CITY = re.compile(r"астан|шымкент|караганд|актоб|актау|атырау|павлодар|усть-каменогорск|өскемен|семей|тараз|"
+                        r"костана|кызылорд|уральск|петропавловск|талдыкорган|туркестан|кокшетау|экибастуз|нур-султан", _I)
+CANCEL = re.compile(r"передумал|уже не нужно|не нужно уже|отмените|отменяю|отмена заявки|ой,? не надо|не надо уже|керек емес", _I)
+
+
+def mentions_other_city(text, home_city):
+    m = OTHER_CITY.search(text or "")
+    return bool(m) and (home_city or "").lower()[:5] not in m.group(0).lower()
+
+
+def is_cancel(text):
+    return bool(CANCEL.search(text or ""))

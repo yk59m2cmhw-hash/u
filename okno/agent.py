@@ -77,6 +77,14 @@ class Conversation:
             self.lead.task = self.lead.task or text[:300]
             self._light_extract(text)
             return self._handoff("complaint", user_text=text)
+        if guards.mentions_other_city(text, self.kb.get("city", "")):
+            self.lead.task = self.lead.task or text[:300]
+            self._light_extract(text)
+            return self._handoff("out_of_scope", user_text=text,
+                                 prefix=f"Сейчас мы работаем только по городу {self.kb.get('city', '')}.")
+        if guards.is_cancel(text):
+            self.status = "closed"
+            return self._reply(text, "Хорошо, заявку не отправляю. Если понадобится мастер — пишите в любое время.")
         if guards.is_decline(text) and not self.lead.task:
             self.status = "closed"
             return self._reply(text, "Хорошо! Если понадобится мастер — пишите в любое время.")
@@ -106,6 +114,12 @@ class Conversation:
         if self.lead.is_complete():
             if self.status == "confirming" and turn.user_confirmed:
                 return self._handoff("lead_ready", user_text=text)
+            if self.status == "collecting" and not self.lead.name and "name" not in self.asked:
+                # The name is optional, but ask once before the summary (it was skipped if the phone came first).
+                self.asked.add("name")
+                self.last_question = "name"
+                lead_in = reply if reply and "?" not in reply else ""
+                return self._reply(text, (lead_in + " " if lead_in else "") + "Как к вам обращаться?")
             self.status = "confirming"
             self.last_question = "confirm"
             intro = reply if reply and "?" not in reply else ""

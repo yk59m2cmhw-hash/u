@@ -72,7 +72,7 @@ def estimated_usage(ctx, output_text):
 # ---------------------------------------------------------------- offline rules
 
 _DAY = (r"сегодня|завтра|послезавтра|в понедельник|во вторник|в среду|в четверг|в пятницу|в субботу|"
-        r"в воскресенье|в выходные|на выходных|в будни|бүгін|ертең")
+        r"в воскресенье|в выходные|на выходных|в будни|сейчас|как можно скорее|побыстрее|бүгін|ертең")
 _PART = r"утром|дн[её]м|вечером|после обеда|до обеда|кешке|таңертең|түсте"
 _CLOCK = (r"после \d{1,2}(?::\d{2})?|до \d{1,2}(?::\d{2})?|с \d{1,2}(?::\d{2})? до \d{1,2}(?::\d{2})?|"
           r"в \d{1,2}(?::\d{2})?(?!\s*(?:комнат|раз|шт))|\d{1,2}:\d{2}")
@@ -151,7 +151,8 @@ class OfflineProvider:
         if s and not lead.service:
             updates["service"] = s
         wordy = len(text.split()) >= 4
-        if (not lead.task and (s or (wordy and not topics and not d)) and not guards.is_yes(text)
+        bare_yes = guards.is_yes(text) and len(text.split()) <= 3
+        if (not lead.task and (s or (wordy and not topics and not d)) and not bare_yes
                 and not guards.is_sales_question(text)):
             task = re.sub(r"\+?\d[\d\s\-()]{6,}\d", "", text).strip(" ,.")
             updates["task"] = task[:300]

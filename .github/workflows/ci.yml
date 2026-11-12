@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Okno unit tests
+        run: python -m unittest discover -s okno/tests -t .
+      - name: Okno scripted dialogs (offline, must pass 90%)
+        run: python -m okno.evals.run
+      - name: Credits database
+        run: python tools/credits.py validate && python tools/test_credits.py && python tools/test_niches.py
+      - name: Cost models
+        run: python models/test_unit_economics.py && python models/test_okno_costs.py

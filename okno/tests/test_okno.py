@@ -162,7 +162,8 @@ class Dialogs(unittest.TestCase):
         ])
         conv = Conversation(KB, provider)
         out = conv.handle("Повесить полку, Медеуский, завтра, 87011234567")
-        self.assertEqual(out["status"], "confirming")
+        self.assertEqual(out["status"], "collecting")          # complete, but the optional name is asked once
+        self.assertIn("Как к вам обращаться?", out["reply"])
         out = conv.handle("а можно ещё вопрос про гарантию?")
         self.assertEqual((out["status"], out["handoff_reason"]), ("handed_off", "model_refusal"))
 
