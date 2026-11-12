@@ -1,0 +1,54 @@
+key,value,unit,kind,source,date,note
+gpu.h100.gcp,11.06,usd per GPU-hour,source,https://neurohive.io/en/guides/cloud-gpu-pricing/,2026-10,a3-highgpu-8g $88.49 per 8 GPUs on-demand
+gpu.h100.aws,6.88,usd per GPU-hour,source,https://neurohive.io/en/guides/cloud-gpu-pricing/,2026-10,p5.48xlarge $55.04 per 8 GPUs on-demand
+gpu.h100.azure,12.29,usd per GPU-hour,source,https://neurohive.io/en/guides/cloud-gpu-pricing/,2026-10,ND96isr H100 v5
+gpu.h100.neocloud,3.99,usd per GPU-hour,source,https://neurohive.io/en/guides/cloud-gpu-pricing/,2026-10,Lambda / RunPod SXM on-demand
+gpu.h100.marketplace,2.14,usd per GPU-hour,source,https://neurohive.io/en/guides/cloud-gpu-pricing/,2026-10,Vast.ai on-demand
+gpu.l4.gcp,0.85,usd per GPU-hour,source,https://calculator.holori.com/gcp/vm/g2-standard-8/us-central1,2026-01,g2-standard-8 us-central1 (spot ~$0.71)
+gpu.l4.aws,0.805,usd per GPU-hour,source,https://gpu-cost.pages.dev/provider/aws/,2026-06,g6.xlarge us-east-1 (spot ~$0.43)
+gpu.l4.marketplace,0.33,usd per GPU-hour,source,https://gpu-cost.pages.dev/gpu/l4/,2026-06,cheapest on-demand L4 (Vast.ai)
+tput.moe120b.h100,3000,output tokens/s per GPU,assumption,,,"gpt-oss-120b-class MoE, vLLM, high concurrency; verify with a benchmark on your hardware"
+tput.dense70b.h100,1000,output tokens/s per GPU,assumption,,,"70B dense FP8 split across GPUs; per-GPU share"
+tput.dense8b.h100,4000,output tokens/s per GPU,assumption,,,8B dense FP8 at high concurrency
+tput.dense8b.l4,800,output tokens/s per GPU,assumption,,,8B dense FP8 on one L4 at high concurrency
+prefill.speedup,10,x,assumption,,,input (prefill) tokens are processed ~10x faster than generated tokens
+ratio.in_out,3,input tokens per output token,source,https://benchlm.ai/stats/llm-pricing,2026-07,the 3:1 ratio used for blended market prices
+price.gptoss120b.deepinfra.in,0.037,usd per 1M tokens,source,https://infrabase.ai/blog/cheapest-inference-providers,2026-07,cheapest gpt-oss-120b input
+price.gptoss120b.deepinfra.out,0.17,usd per 1M tokens,source,https://infrabase.ai/blog/cheapest-inference-providers,2026-07,cheapest gpt-oss-120b output
+price.gptoss120b.together.in,0.15,usd per 1M tokens,source,https://www.digitalocean.com/community/tutorials/llm-inference-cost-comparison,2026-07,Together / Fireworks / Groq level
+price.gptoss120b.together.out,0.60,usd per 1M tokens,source,https://www.digitalocean.com/community/tutorials/llm-inference-cost-comparison,2026-07,Together / Fireworks / Groq level
+price.dense70b.median.in,0.48,usd per 1M tokens,source,https://benchlm.ai/stats/llm-pricing,2026-07,median blended open-weight price used for both directions
+price.dense70b.median.out,0.48,usd per 1M tokens,source,https://benchlm.ai/stats/llm-pricing,2026-07,median blended open-weight price used for both directions
+api.gemini25_flash_lite.in,0.10,usd per 1M tokens,source,https://anotherwrapper.com/llm-pricing/gemini-2.5-flash-lite,2026-11,
+api.gemini25_flash_lite.out,0.40,usd per 1M tokens,source,https://anotherwrapper.com/llm-pricing/gemini-2.5-flash-lite,2026-11,
+api.gemini35_flash_lite.in,0.30,usd per 1M tokens,source,https://anotherwrapper.com/tools/llm-pricing/gemini-3.5-flash-lite,2026-10,first-party price per ai.google.dev on 2026-10-17
+api.gemini35_flash_lite.out,2.50,usd per 1M tokens,source,https://anotherwrapper.com/tools/llm-pricing/gemini-3.5-flash-lite,2026-10,
+api.claude_haiku55.in,0.10,usd per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,Claude API reference (prompts up to 100K tokens)
+api.claude_haiku55.out,0.50,usd per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+api.claude_sonnet55.in,2.00,usd per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+api.claude_sonnet55.out,10.00,usd per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+agent.turns,8,turns per conversation,assumption,,,a booking or FAQ chat
+agent.in_tokens_per_turn,3000,tokens,assumption,,,system prompt + history + tool results
+agent.out_tokens_per_turn,150,tokens,assumption,,,short replies in a messenger
+agent.cached_share,0.6,share of input tokens,assumption,,,stable system prompt and tools served from prompt cache
+agent.cache_price_factor,0.1,x input price,assumption,,,cache reads ~5-10% of input price on major APIs
+agent.hard_turn_share,0.1,share of turns,assumption,,,turns routed to a strong model (Claude Sonnet 5.5)
+agent.selfhost_utilization,0.3,share,assumption,,,average load of a small self-hosted GPU early on
+client.price_per_month,250,usd,assumption,,,between DIY platforms ($20-150) and agencies ($500-4000); vertical AI receptionists $149-449
+client.setup_fee,500,usd,assumption,,,one-off onboarding
+client.conversations_per_month,600,conversations,assumption,,,about 25 per working day for a small clinic
+client.reminders_per_month,400,messages,assumption,,,appointment reminders
+client.reminder_cost,0.02,usd per message,assumption,,,WhatsApp template fees vary by country; verify Meta pricing
+client.voice_minutes_per_month,0,minutes,assumption,,,chat-first MVP; voice is a later add-on
+client.voice_cost_per_min,0.15,usd per minute,source,https://dupple.com/learn/vapi-vs-retell-ai,2026-11,all-in voice stack $0.10-0.30 per minute
+client.hosting_per_month,10,usd,assumption,,,shared app servers and database per client
+client.support_hours_per_month,2,hours,assumption,,,prompt fixes and answering the owner
+client.hour_cost,15,usd per hour,assumption,,,founder time valued at $15/hour
+client.cac,400,usd,assumption,,,outreach + demo + onboarding time per signed client
+plan.months,12,months,assumption,,,
+plan.new_clients_per_month,5,clients,assumption,,,from month 2 onward
+plan.monthly_churn,0.03,share,assumption,,,SMB churn
+infra.base_per_month,150,usd,assumption,,,VMs + database + storage + monitoring
+infra.l4_count,1,GPUs,assumption,,,one always-on L4 for a self-hosted small model
+credits.p1,14000,usd,assumption,,,"Google $2K + AWS $1K + Microsoft $5K + Modal ~$5K + DigitalOcean $1K (realistic P1, see research/credits)"
+credits.p1.valid_months,12,months,assumption,,,most self-serve credits expire within 12 months
