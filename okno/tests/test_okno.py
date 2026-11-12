@@ -134,6 +134,11 @@ class Dialogs(unittest.TestCase):
         out = conv.handle("+77025556677")
         self.assertEqual((out["status"], out["handoff_reason"]), ("handed_off", "urgent"))
 
+    def test_greeting_not_part_of_task(self):
+        conv = Conversation(KB, offline())
+        conv.handle("Здравствуйте, течёт кран на кухне")
+        self.assertEqual(conv.lead.task, "Течёт кран на кухне")
+
     def test_whatsapp_known_phone_skips_question(self):
         conv = Conversation(KB, offline(), channel="whatsapp", known_phone="87011234567")
         conv.handle("Нужно собрать шкаф")

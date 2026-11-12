@@ -23,6 +23,9 @@ from .prompts import FIELDS, TURN_SCHEMA
 FALLBACK_MODELS = {"claude-opus-5-5", "claude-sonnet-5-5", "claude-opus-5", "claude-fable-5-2"}
 
 
+# Leading greetings are not part of the task description ("Здравствуйте, течёт кран" -> "Течёт кран").
+_GREETING = re.compile(r"^\s*(?:здравствуйте|здрасьте|добрый\s+(?:день|вечер)|доброе\s+утро|привет|сәлеметсіз\s+бе|салем|сәлем|hello|hi)[\s,.!]*", re.I)
+
 class ProviderError(RuntimeError):
     pass
 
@@ -155,7 +158,8 @@ class OfflineProvider:
         if (not lead.task and (s or (wordy and not topics and not d)) and not bare_yes
                 and not guards.is_sales_question(text)):
             task = re.sub(r"\+?\d[\d\s\-()]{6,}\d", "", text).strip(" ,.")
-            updates["task"] = task[:300]
+            task = _GREETING.sub("", task).strip(" ,.!") or task
+            updates["task"] = task[:1].upper() + task[1:300]
 
         if ctx.status == "collecting" and not ctx.history:
             parts.append(f"Здравствуйте! Я виртуальный помощник компании «{kb['company']}».")
