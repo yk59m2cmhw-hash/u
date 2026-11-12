@@ -49,10 +49,15 @@ class WebhookSink:
 
 
 def sinks_from_env(default_file="data/leads.jsonl"):
-    """JSONL always; Telegram if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID; webhook if OKNO_WEBHOOK_URL."""
+    """JSONL always; Telegram, webhook, Bitrix24 and amoCRM when their variables are set."""
     sinks = [JsonlSink(os.environ.get("OKNO_LEADS_FILE", default_file))]
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
         sinks.append(TelegramSink(os.environ["TELEGRAM_BOT_TOKEN"], os.environ["TELEGRAM_CHAT_ID"]))
     if os.environ.get("OKNO_WEBHOOK_URL"):
         sinks.append(WebhookSink(os.environ["OKNO_WEBHOOK_URL"]))
+    from .crm import AmoCrmSink, Bitrix24Sink  # local import keeps handoff.py dependency-free
+    if os.environ.get("BITRIX24_WEBHOOK_URL"):
+        sinks.append(Bitrix24Sink(os.environ["BITRIX24_WEBHOOK_URL"]))
+    if os.environ.get("AMOCRM_BASE_URL") and os.environ.get("AMOCRM_TOKEN"):
+        sinks.append(AmoCrmSink(os.environ["AMOCRM_BASE_URL"], os.environ["AMOCRM_TOKEN"]))
     return sinks
