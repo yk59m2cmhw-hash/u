@@ -62,8 +62,10 @@ def build_system(kb):
     return SYSTEM.format(company=kb["company"], city=kb.get("city", ""), kb=kbmod.render(kb))
 
 
-def build_user_content(user_text, lead, status):
+def build_user_content(user_text, lead, status, mask_phone=False):
     state = {f: getattr(lead, f) for f in FIELDS}
+    if mask_phone and state["phone"]:
+        state["phone"] = "указан"
     return (f"Сообщение клиента:\n{user_text}\n\n"
             f"[Служебно, клиент этого не видит] Статус: {status}. "
             f"Заявка сейчас: {json.dumps(state, ensure_ascii=False)}. "

@@ -121,6 +121,7 @@ class OfflineProvider:
     """Rules and templates for the demo without a model. Clearly labelled; not an LLM."""
     name = "offline"
     model = "rules-v1"
+    sends_data_out = False
 
     def __init__(self, kb):
         self.kb = kb
@@ -196,6 +197,7 @@ class OfflineProvider:
 class AnthropicProvider:
     """Claude via the official SDK with structured output (output_config.format)."""
     name = "anthropic"
+    sends_data_out = True
 
     def __init__(self, model=None, effort="low", client=None):
         self.model = model or os.environ.get("OKNO_MODEL") or "claude-opus-5-5"
@@ -246,6 +248,7 @@ class AnthropicProvider:
 class GeminiProvider:
     """Gemini via Google's OpenAI-compatible endpoint; key in GEMINI_API_KEY (Bearer)."""
     name = "gemini"
+    sends_data_out = True
     URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 
     def __init__(self, model=None, api_key=None, opener=None):
@@ -284,6 +287,7 @@ class GeminiProvider:
 class ReplayProvider:
     name = "replay"
     model = "recorded"
+    sends_data_out = True
 
     def __init__(self, turns):
         self.turns = list(turns)

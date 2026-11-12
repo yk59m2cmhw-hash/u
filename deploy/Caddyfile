@@ -1,0 +1,4 @@
+{$OKNO_DOMAIN} {
+	encode gzip
+	reverse_proxy okno:8080
+}

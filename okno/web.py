@@ -35,6 +35,9 @@ class DemoApp:
                  wa_client=None, tg_client=None, async_channels=True):
         self.env = dict(os.environ if env is None else env)
         self.kb_path = pathlib.Path(kb_path or self.env.get("OKNO_KB_PATH") or kbmod.DEFAULT_KB)
+        if not self.kb_path.exists():  # first start: begin from the demo knowledge base, then edit in /admin
+            self.kb_path.parent.mkdir(parents=True, exist_ok=True)
+            self.kb_path.write_text(pathlib.Path(kbmod.DEFAULT_KB).read_text(encoding="utf-8"), encoding="utf-8")
         self.kb = kbmod.load(self.kb_path)
         self.provider_name, self.model = provider_name, model
         self.sinks = sinks if sinks is not None else sinks_from_env()

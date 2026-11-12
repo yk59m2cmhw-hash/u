@@ -249,3 +249,37 @@ class Evals(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class Privacy(unittest.TestCase):
+    def test_phone_never_reaches_external_model(self):
+        seen = []
+
+        class Capture(ReplayProvider):
+            def next_turn(self, ctx):
+                seen.append(ctx.user_content + " ".join(m["content"] for m in ctx.history))
+                return super().next_turn(ctx)
+
+        provider = Capture([turn("Принято. В каком районе?", task="полка"),
+                            turn("Спасибо.", district="Медеуский", time_window="завтра")])
+        conv = Conversation(KB, provider)
+        conv.handle("Повесить полку, мой номер 8 701 123 45 67")
+        conv.handle("Медеуский, завтра")
+        self.assertEqual(conv.lead.phone, "+77011234567")
+        for text in seen:
+            self.assertNotIn("123 45 67", text)
+            self.assertNotIn("7011234567", text)
+        self.assertIn("[телефон]", seen[0])
+        self.assertIn('"phone": "указан"', seen[1])
+
+    def test_offline_mode_keeps_text(self):
+        self.assertFalse(OfflineProvider.sends_data_out)
+        self.assertEqual(phone.redact("звоните 87011234567 или 112"), "звоните [телефон] или 112")
+
+    def test_privacy_notice_once(self):
+        kb = dict(KB, privacy_notice="Мы обрабатываем имя и телефон только для заявки.")
+        conv = Conversation(kb, offline())
+        first = conv.handle("Течёт кран")["reply"]
+        second = conv.handle("Медеуский")["reply"]
+        self.assertIn("только для заявки", first)
+        self.assertNotIn("только для заявки", second)

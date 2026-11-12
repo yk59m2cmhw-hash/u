@@ -1,0 +1,26 @@
+services:
+  okno:
+    build: .
+    env_file: .env
+    volumes:
+      - ./data:/app/data          # leads and the company knowledge base (personal data: keep the server in-country)
+    restart: unless-stopped
+    expose:
+      - "8080"
+
+  caddy:                          # HTTPS for webhooks (WhatsApp and Telegram require it); automatic certificates
+    image: caddy:2.8
+    environment:
+      - OKNO_DOMAIN=${OKNO_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - okno
+    restart: unless-stopped
+
+volumes:
+  caddy_data:

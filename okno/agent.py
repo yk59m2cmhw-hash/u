@@ -134,9 +134,19 @@ class Conversation:
     # ------------------------------------------------------------- internals
 
     def _model_turn(self, text):
-        ctx = TurnContext(kb=self.kb, system=self.system, history=list(self.history), user_text=text,
-                          user_content=build_user_content(text, self.lead, self.status), lead=self.lead,
-                          status=self.status, asked=set(self.asked), last_question=self.last_question)
+        external = getattr(self.provider, "sends_data_out", False)
+        history, model_text = list(self.history), text
+        if external:
+            # Personal-data minimisation (D-022): the phone is captured by code; the model never sees it.
+            p = phonemod.extract(text)
+            if p:
+                self.lead.phone = p
+            model_text = phonemod.redact(text)
+            history = [{"role": m["role"], "content": phonemod.redact(m["content"])} for m in history]
+        ctx = TurnContext(kb=self.kb, system=self.system, history=history, user_text=model_text,
+                          user_content=build_user_content(model_text, self.lead, self.status, mask_phone=external),
+                          lead=self.lead, status=self.status, asked=set(self.asked),
+                          last_question=self.last_question)
         try:
             turn = self.provider.next_turn(ctx)
         except ProviderError as e:
@@ -180,6 +190,8 @@ class Conversation:
         return self._reply(user_text, " ".join(x for x in (prefix, base) if x).strip())
 
     def _reply(self, user_text, reply, sanitize=True):
+        if not self.history and self.kb.get("privacy_notice"):  # shown once, in the first reply
+            reply = f"{reply}\n\n{self.kb['privacy_notice']}"
         if sanitize:  # final safety net for every model-written path
             reply, flags = guards.sanitize_reply(reply)
             self.flags += flags

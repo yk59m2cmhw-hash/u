@@ -41,3 +41,10 @@ def looks_like_phone_attempt(text):
     """True when the message is mostly digits but not a valid number (e.g. '123')."""
     digits = re.sub(r"\D", "", text or "")
     return bool(digits) and len(digits) >= 3 and extract(text) is None and len(digits) >= len(text.strip()) * 0.5
+
+
+def redact(text, placeholder="[телефон]"):
+    """Replace every valid phone number in text with a placeholder (before sending text to an external model)."""
+    def repl(m):
+        return placeholder if normalize(m.group(0)) else m.group(0)
+    return _CANDIDATE.sub(repl, text or "")
