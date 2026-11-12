@@ -8,3 +8,5 @@ node_modules/
 *.tfstate.*
 .pytest_cache/
 **/shots/
+data/
+*.jsonl
