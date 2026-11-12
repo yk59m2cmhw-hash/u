@@ -1,0 +1,2 @@
+id,source,segment,city,district,has_messenger,reviews_count,signal,first_touch_date,channel,status,next_step,notes
+P00-example,2GIS,plumbing,Алматы,Бостандыкский,yes,24,"review mentions slow replies",2026-11-16,WhatsApp,contacted,"follow up 2026-11-18","EXAMPLE ROW - keep the real list outside this public repo"
