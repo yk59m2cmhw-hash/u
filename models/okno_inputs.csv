@@ -1,0 +1,34 @@
+key,value,unit,kind,source,date,note
+fx.kzt_per_usd,450,KZT per USD,source,https://www.zakon.kz/finansy/6538022-kurs-dollara-vyros-na-torgakh-9-noyabrya.html,2026-11-09,KASE weighted average 448.98; National Bank 453.77 on 2026-11-02 (bes.media)
+conv.per_client_month,150,conversations,assumption,,,about 5 customer inquiries a day for a small home-services firm; check in interviews
+conv.input_tokens,7100,tokens per conversation,assumption,,,estimate from the offline eval (same prompt; characters/3; no caching); measure on a real model
+conv.output_tokens,1000,tokens per conversation,assumption,,,~5 model calls x ~200 tokens of JSON and light thinking at low effort
+conv.bot_messages,5,messages per conversation,assumption,,,agent replies per conversation
+model.claude-opus-5-5.in,4.00,USD per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,Claude API reference cache
+model.claude-opus-5-5.out,20.00,USD per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+model.claude-sonnet-5-5.in,2.00,USD per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+model.claude-sonnet-5-5.out,10.00,USD per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+model.claude-haiku-5-5.in,0.10,USD per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,prompts up to 100K tokens
+model.claude-haiku-5-5.out,0.50,USD per 1M tokens,source,https://www.anthropic.com/pricing,2026-11-03,
+model.gemini-2.5-flash-lite.in,0.10,USD per 1M tokens,source,https://anotherwrapper.com/llm-pricing/gemini-2.5-flash-lite,2026-11,
+model.gemini-2.5-flash-lite.out,0.40,USD per 1M tokens,source,https://anotherwrapper.com/llm-pricing/gemini-2.5-flash-lite,2026-11,
+wa.service_msg_usd,0.0207,USD per message,source,https://agentdeals.dev/whatsapp-business-api-pricing-2026,2026-10,"Kazakhstan standalone rates since 2026-10-01; service replies priced like utility (Gupshup changelog); verify on Meta's rate card"
+wa.bsp_fee_usd_month,50,USD per number per month,assumption,https://vc.ru/services/2943043-resheniya-dlya-integratsii-whatsapp-s-crm,2026,"Wazzup ~4,000 RUB per number per month (Russian source), converted at ~80 RUB/USD; 0 when connecting Meta Cloud API directly"
+tg.msg_usd,0,USD per message,assumption,,,Telegram Bot API is free
+infra.server_usd_month,25,USD per month,assumption,https://hostinghub.ru/top/vds/kazahstan-vps,2026,"VPS in Kazakhstan, 2 vCPU / 4-8 GB: ~1,870-2,566 RUB/month on an aggregator; ~$25"
+infra.other_usd_month,10,USD per month,assumption,,,"domain, email, monitoring, backups"
+time.hour_kzt,4000,KZT per founder hour,assumption,,,founder time valued at ~$9/hour; the biggest driver - see sensitivity
+onboarding.hours,6,hours per new client,assumption,,,"knowledge base 2 h, channel 1.5 h, testing 1.5 h, staff briefing 1 h"
+support.hours_month,1.5,hours per client per month,assumption,,,early clients; target 0.75 at scale
+lifetime.months,12,months,assumption,,,amortisation period for onboarding and acquisition (SMB churn ~8%/month)
+funnel.contacts,50,companies,assumption,,,see gtm/wtp-test-plan.md
+funnel.conversations,15,companies,assumption,,,30% of contacts agree to talk
+funnel.demos,5,companies,assumption,,,
+funnel.pilots,3,companies,assumption,,,
+funnel.paid,1.5,companies,assumption,,,50% of pilots convert to paid
+hours.per_contact,0.25,hours,assumption,,,finding and first message
+hours.per_conversation,0.75,hours,assumption,,,call or visit
+hours.per_demo,1.5,hours,assumption,,,
+hours.per_pilot,6,hours,assumption,,,"two weeks of check-ins and fixes, excluding onboarding"
+pay.fee_pct,1.0,% of revenue,source,https://digitalbusiness.kz/2026-06-24/kaspi-pay-menyaet-komissiyu-za-priem-oplati-cherez-smart-pos-s-30-iyunya/,2026-06,Kaspi Pay base 0.95% for Kaspi Gold via Smart POS; B2B invoices may differ
+tax.pct,4.0,% of revenue,source,https://guide.kaspi.kz/partner/ru/tax/conditions,2026,"simplified declaration 4% in Kaspi Guide; depends on the country of registration (not chosen, D-004)"
