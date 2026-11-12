@@ -64,6 +64,19 @@ cd /opt/okno && sudo git pull && sudo docker compose up -d --build
 - Доступность: бесплатный внешний монитор на `https://ВАШ_ДОМЕН/api/info` раз в 5 минут.
 - Расходы на модель: смотрите в консоли провайдера; лимит расходов задайте там же.
 
+## 7. Лендинг на GitHub Pages
+
+Workflow [.github/workflows/pages.yml](../.github/workflows/pages.yml) публикует `offer/landing.html` как главную
+страницу сайта при каждом изменении лендинга в `main`.
+
+1. Один раз: репозиторий на GitHub → Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+2. Actions → pages → Run workflow (или любое изменение `offer/landing.html`).
+3. Адрес — `https://<владелец>.github.io/u/`; свой домен — там же, поле Custom domain (нужна запись DNS у
+   регистратора домена).
+
+Пока Pages не включён, запуск workflow pages падает — на тесты это не влияет. Лендинг статический: в нём нет форм и
+не собираются данные; контакты для связи добавьте сами, когда будет почта на своём домене.
+
 ## Что не сделано и почему
 
 - Образ Docker не собирался в облачной сессии: клиент Docker там есть, но демон не запущен. Код и тесты
